@@ -1,21 +1,48 @@
-import { CylinderGeometry, Mesh, MeshPhongMaterial, BoxGeometry, Object3D , MeshNormalMaterial} from 'three';
+import {
+    BoxGeometry,
+    CylinderGeometry,
+    Mesh,
+    MeshNormalMaterial,
+    MeshPhongMaterial,
+    MeshPhysicalMaterial,
+    Object3D,
+} from 'three';
 
+const ROTATION_STEP = Math.PI / 2;
 
 export default class Lego extends Object3D {
     constructor(options = {}) {
         super();
 
         this.size = Math.max(options.size, 1);
+        this.color = options.color;
+        this.altitude = options.altitude;
+        this.orientation = options.orientation;
+        this.material = options.material;
 
-        this.addLegoBox = this.createBox();
-        this.addLegoCylinder1 = this.createCylinders();
+        // this.material = this.createMaterial();
+        this.box = this.createBox();
+        this.cylinders = this.createCylinders();
 
+        this.updateTransform();
     }
+
+    // createMaterial() {
+    //     const material = new MeshPhysicalMaterial({
+    //         color: this.color,
+    //         roughness: 0.5,
+    //         clearcoat: 1.0,
+    //         clearcoatRoughness: 0.1,
+    //         // map: diffuse,
+    //         // normalMap: normalMap,
+    //     });
+
+    //     return material;
+    // }
 
     createBox() {
         const geometry = new BoxGeometry(1, 1, 1);
-        const material = new MeshNormalMaterial();
-        const mesh = new Mesh(geometry, material);
+        const mesh = new Mesh(geometry, this.material);
 
         mesh.scale.x = this.size;
 
@@ -26,12 +53,12 @@ export default class Lego extends Object3D {
         return mesh;
     }
 
-    createCylinders(){
+    createCylinders() {
         const cylinders = [];
 
-        for (let i = 1; i <= this.size; i++) {
+        for (let index = 1; index <= this.size; index++) {
             const cylinder = this.createCylinder();
-            cylinder.position.x = i - 1;
+            cylinder.position.x = index - 1;
         }
 
         return cylinders;
@@ -39,7 +66,7 @@ export default class Lego extends Object3D {
 
     createCylinder() {
         const geometry = new CylinderGeometry(1, 1, 1, 32, 1);
-        const material = new MeshNormalMaterial();
+        const material = this.material;
         const mesh = new Mesh(geometry, material);
 
         mesh.scale.set(0.2, 0.3, 0.2);
@@ -49,6 +76,9 @@ export default class Lego extends Object3D {
 
         return mesh;
     }
-    
 
+    updateTransform() {
+        this.position.y = this.altitude;
+        this.rotation.y = ROTATION_STEP * this.orientation;
+    }
 }
